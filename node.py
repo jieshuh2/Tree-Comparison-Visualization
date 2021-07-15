@@ -3,7 +3,6 @@ from openpyxl.styles import colors
 from openpyxl.styles import Font, Color
 from openpyxl.cell import WriteOnlyCell
 from openpyxl import load_workbook
-import pandas as pd
 
 #tree structure
 class Node:
@@ -14,7 +13,10 @@ class Node:
         self.info = info
         self.children = []
         self.find = 0
-        self.iid = -1
+        self.iid = ""
+        self.id1 = ""
+        self.id3 = ""
+        # self.hid = 0
     def addchildren(self, child) :
         self.children.append(child)
     def equal(self, other) :
@@ -26,6 +28,7 @@ class Node:
             return True
         return False
 red = Font(color="00FF0000")
+blue = Font(color="000000FF")
 #write treenode 1, actually used only for unmatch
 def writenode1(node, isred, ws):
     if isred:
@@ -35,11 +38,16 @@ def writenode1(node, isred, ws):
         n.font = red
         num = WriteOnlyCell(ws, value=node.number)
         num.font = red
-        i = WriteOnlyCell(ws, value=node.info)
+        inffo = node.info.split("|")
+        i = WriteOnlyCell(ws, value=inffo[0])
         i.font = red
-        ws.append([h, n, num, i])
+        ii = WriteOnlyCell(ws, value=int(inffo[1]))
+        ii.font = red
+        iii = WriteOnlyCell(ws, value=inffo[2])
+        iii.font = red
+        ws.append([h, n, num, i, ii, iii])
     else:
-        ws.append([node.height, node.name, node.number, node.info])
+        ws.append([node.height, node.name, node.number, node.info, "","","","",""])
 #write treenode 2, actually used only for unmatch
 def writenode2(node, isred, ws):
     if isred:
@@ -51,15 +59,21 @@ def writenode2(node, isred, ws):
         num.font = red
         i = WriteOnlyCell(ws, value=node.info)
         i.font = red
-        ws.append(["","","","","",h, n, num, i])
+        ws.append(["","","","","","",h, n, num, i])
     else:
-        ws.append(["","","","","",node.height, node.name, node.number, node.info])
+        ws.append(["","","","","","",node.height, node.name, node.number, node.info])
 def dfs(node) :
     print(node.name)
     if node.children == []:
         return
     for i in node.children:
         dfs(i)
+def clean(node):
+    node.find = 0
+    if node.children == []:
+        return
+    for i in node.children:
+        clean(i)
 #for form 2 test, dictionary tree
 def dfs2(dic, parent):
     if dic.get(parent.name) != None:
@@ -73,10 +87,15 @@ def dfs2(dic, parent):
 def buildtree(dic, parent):
     if dic.get(parent.name) != None:
         children = dic[parent.name]
+        tchildren = []
         for child in children:
+            tc = Node(child.height, child.name, child.number, child.info)
+            tchildren.append(tc)
+        sorted(tchildren, key=lambda child: child.name)
+        for child in tchildren:
             child.height = parent.height + 1
             parent.children.append(child)
-        for child in children:
+        for child in tchildren:
             buildtree(dic, child)
 def buildform(node, ws):
     ws.append([node.height, node.name, node.number, node.info])
@@ -148,7 +167,7 @@ def form1(filename):
             project = line[3].value
             sign = line[4].value
             condition = line[5].value
-            info = project + "  " + str(sign) + "  " + condition
+            info = project + "|" + str(sign) + "|" + condition
             node = Node(height, name, number, info)
             height = int(height)
             if height == 0:
@@ -157,6 +176,7 @@ def form1(filename):
             parent = hierachy1.get(height - 1)
             if parent != None:
                 parent.children.append(node)
+                sorted(parent.children, key=lambda child: child.name)
     else :
         f = open(filename, 'r')
         for line in f:
@@ -192,7 +212,7 @@ def form1(filename):
             condition = line.find("\t")
             condition = line[0 : index]
 
-            info = project + "\t" + sign + "\t" + condition
+            info = project + "|" + sign + "|" + condition
             node = Node(height, name, number, info)
             height = int(height)
             if height == 0:
