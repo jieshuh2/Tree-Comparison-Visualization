@@ -15,7 +15,6 @@ Support simple search that use "*" to represents any string
 # code are in branch master
 # Usage
 python main.py
-Or click on the .exe file.
 # Notice
 This program is built for my mother's usage. So the UI and test forms are in Chinese. 
 
