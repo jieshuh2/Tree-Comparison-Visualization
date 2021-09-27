@@ -18,3 +18,4 @@ python main.py
 # Notice
 This program is built for my mother's usage. So the UI and test forms are in Chinese. 
 
+![demo](https://user-images.githubusercontent.com/60613859/134834683-64227d69-ecef-4f16-8bc8-b4261276483a.png)
